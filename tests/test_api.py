@@ -58,6 +58,7 @@ def test_requests_are_counted(client):
     metrics = client.get("/metrics").text
     assert "http_requests_total" in metrics
 
+
 def test_prediction_metrics_are_recorded(client):
     client.post("/predict", json={"text": "I love this product"})
     metrics = client.get("/metrics").text
