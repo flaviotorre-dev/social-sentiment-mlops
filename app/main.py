@@ -9,6 +9,12 @@ from app.model import load_model, predict
 
 REQUESTS = Counter("http_requests_total", "Richieste HTTP", ["path", "status"])
 LATENCY = Histogram("http_request_duration_seconds", "Latenza richieste HTTP", ["path"])
+PREDICTIONS = Counter("predictions_total", "Predizioni per classe", ["label"])
+TEXT_LENGTH = Histogram(
+    "input_text_length_chars",
+    "Lunghezza dei testi in ingresso",
+    buckets=(10, 25, 50, 100, 200, 300, 512),
+)
 
 
 @asynccontextmanager
@@ -48,4 +54,7 @@ def health():
 
 @app.post("/predict", response_model=PredictResponse)
 def predict_endpoint(body: PredictRequest, request: Request):
-    return predict(request.app.state.classifier, body.text)
+    result = predict(request.app.state.classifier, body.text)
+    PREDICTIONS.labels(result["label"]).inc()
+    TEXT_LENGTH.observe(len(body.text))
+    return result
