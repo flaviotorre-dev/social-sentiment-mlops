@@ -5,7 +5,9 @@ from pydantic import BaseModel, Field
 
 from app.model import load_model, predict
 
-from prometheus_client import make_asgi_app
+from prometheus_client import Counter, make_asgi_app
+
+REQUESTS = Counter("http_requests_total", "Richieste HTTP", ["path", "status"])
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -15,6 +17,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Sentiment Service", lifespan=lifespan)
 app.mount("/metrics", make_asgi_app())
+
+@app.middleware("http")
+async def count_requests(request: Request, call_next):
+    response = await call_next(request)
+    if not request.url.path.startswith("/metrics"):
+        REQUESTS.labels(request.url.path, str(response.status_code)).inc()
+    return response
 
 class PredictRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=512)
