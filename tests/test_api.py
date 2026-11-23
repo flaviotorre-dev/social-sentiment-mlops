@@ -45,3 +45,8 @@ def test_too_long_text_is_rejected(client):
 def test_missing_field_is_rejected(client):
     response = client.post("/predict", json={})
     assert response.status_code == 422
+
+def test_metrics_endpoint(client):
+    response = client.get("/metrics")
+    assert response.status_code == 200
+    assert "python_info" in response.text
