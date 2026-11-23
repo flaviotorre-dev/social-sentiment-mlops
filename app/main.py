@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 from app.model import load_model, predict
 
+from prometheus_client import make_asgi_app
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -13,7 +14,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Sentiment Service", lifespan=lifespan)
-
+app.mount("/metrics", make_asgi_app())
 
 class PredictRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=512)
