@@ -46,10 +46,12 @@ def test_missing_field_is_rejected(client):
     response = client.post("/predict", json={})
     assert response.status_code == 422
 
+
 def test_metrics_endpoint(client):
     response = client.get("/metrics")
     assert response.status_code == 200
     assert "python_info" in response.text
+
 
 def test_requests_are_counted(client):
     client.post("/predict", json={"text": "I love this product"})
