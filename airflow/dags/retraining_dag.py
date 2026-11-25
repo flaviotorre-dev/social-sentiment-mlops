@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
 
-from airflow import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import BranchPythonOperator, PythonOperator
+
+from airflow import DAG
 
 ACCURACY_THRESHOLD = 0.75
 
