@@ -64,3 +64,15 @@ def test_prediction_metrics_are_recorded(client):
     metrics = client.get("/metrics").text
     assert "predictions_total" in metrics
     assert "input_text_length_chars_count" in metrics
+
+
+def test_internal_errors_are_counted(client, monkeypatch):
+    def fail_predict(classifier, text):
+        raise RuntimeError("model failure")
+
+    monkeypatch.setattr("app.main.predict", fail_predict)
+    with pytest.raises(RuntimeError, match="model failure"):
+        client.post("/predict", json={"text": "test"})
+
+    metrics = client.get("/metrics").text
+    assert 'http_requests_total{path="/predict",status="500"}' in metrics

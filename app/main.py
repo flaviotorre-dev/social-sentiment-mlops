@@ -29,13 +29,19 @@ app.mount("/metrics", make_asgi_app())
 
 @app.middleware("http")
 async def record_metrics(request: Request, call_next):
-    start = time.perf_counter()
-    response = await call_next(request)
     path = request.url.path
-    if not path.startswith("/metrics"):
+    if path.startswith("/metrics"):
+        return await call_next(request)
+
+    start = time.perf_counter()
+    status_code = 500
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        return response
+    finally:
         LATENCY.labels(path).observe(time.perf_counter() - start)
-        REQUESTS.labels(path, str(response.status_code)).inc()
-    return response
+        REQUESTS.labels(path, str(status_code)).inc()
 
 
 class PredictRequest(BaseModel):
