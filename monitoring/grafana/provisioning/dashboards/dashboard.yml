@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: Sentiment API
+    orgId: 1
+    folder: MachineInnovators
+    type: file
+    disableDeletion: true
+    editable: false
+    options:
+      path: /etc/grafana/dashboards

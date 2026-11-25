@@ -1,0 +1,14 @@
+groups:
+  - name: sentiment-api
+    rules:
+      - alert: NegativePredictionsAbove60Percent
+        expr: |
+          sum(increase(predictions_total{label="negative"}[15m]))
+          /
+          sum(increase(predictions_total[15m])) > 0.6
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Quota di sentiment negativi superiore al 60%
+          description: Oltre il 60% delle predizioni degli ultimi 15 minuti è negative.
